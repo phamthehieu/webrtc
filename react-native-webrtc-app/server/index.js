@@ -16,5 +16,4 @@ initIO(httpServer);
 
 httpServer.listen(port)
 console.log("Server started on ", port);
-
 getIO();

@@ -3,20 +3,26 @@ let IO;
 
 module.exports.initIO = (httpServer) => {
   IO = new Server(httpServer);
-
   IO.use((socket, next) => {
     if (socket.handshake.query) {
       let callerId = socket.handshake.query.callerId;
       socket.user = callerId;
       next();
+    }else {
+      next(new Error('Invalid callerId'));
     }
   });
 
-  IO.on("connection", (socket) => {
-    console.log(socket.user, "Connected");
+  IO.on("connect", (socket) => {
+    console.log(socket, "Connected");
     socket.join(socket.user);
 
+    socket.on("disconnect", () => {
+      console.log(socket.user, "Disconnected"); // Log khi socket mất kết nối
+    });
+
     socket.on("call", (data) => {
+      console.log(data)
       let calleeId = data.calleeId;
       let rtcMessage = data.rtcMessage;
 
@@ -28,7 +34,7 @@ module.exports.initIO = (httpServer) => {
 
     socket.on("answerCall", (data) => {
       let callerId = data.callerId;
-      rtcMessage = data.rtcMessage;
+      let rtcMessage = data.rtcMessage;
 
       socket.to(callerId).emit("callAnswered", {
         callee: socket.user,

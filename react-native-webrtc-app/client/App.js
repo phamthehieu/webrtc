@@ -39,7 +39,7 @@ export default function App({}) {
   );
   const otherUserId = useRef(null);
 
-  const socket = SocketIOClient('http://192.168.2.201:3500', {
+  const socket = SocketIOClient('http://192.168.0.74:3500', {
     transports: ['websocket'],
     query: {
       callerId,
@@ -69,6 +69,9 @@ export default function App({}) {
   let remoteRTCMessage = useRef(null);
 
   useEffect(() => {
+    socket.on('connect', () => {
+      console.log('Connected to socket server');
+    });
     socket.on('newCall', data => {
       remoteRTCMessage.current = data.rtcMessage;
       otherUserId.current = data.callerId;
@@ -211,6 +214,7 @@ export default function App({}) {
   }
 
   function sendCall(data) {
+    console.log(data)
     socket.emit('call', data);
   }
 
